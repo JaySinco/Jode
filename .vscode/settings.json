@@ -21,7 +21,10 @@
         "${workspaceFolder}/external/fmt/include/",
         "${workspaceFolder}/external/gflags/include/",
         "${workspaceFolder}/external/glog/include/",
-        "${workspaceFolder}/external/json/include/"
+        "${workspaceFolder}/external/json/include/",
+        "${workspaceFolder}/external/node/include/",
+        "${workspaceFolder}/external/node/include/v8/",
+        "${workspaceFolder}/external/node/include/uv/"
     ],
     "C_Cpp.default.defines": [
         "UNICODE",

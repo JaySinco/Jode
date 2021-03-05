@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "../../../source_in_bash_profile.sh"
+source "./source_in_bash_profile.sh"
 cwd=`readlink -f .`
 fmt="${cwd}/external/.bin/clang-format.exe"
 cloc="${cwd}/external/.bin/cloc.exe"
