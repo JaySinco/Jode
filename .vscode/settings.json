@@ -1,0 +1,31 @@
+{
+    "files.exclude": {
+        "bin": true,
+        "dest": true,
+        "external/.bin/*.exe": true,
+        "external/*/bin": true,
+        "external/*/include": true,
+        "external/*/lib": true,
+        "external/*/share": true,
+        "external/*/src/build": true,
+        "external/*/src/*[0-9]": true
+    },
+    "files.watcherExclude": {
+        "bin": true,
+        "dest": true,
+        "external": true
+    },
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/src/",
+        "${workspaceFolder}/external/boost/include/boost-1_74/",
+        "${workspaceFolder}/external/fmt/include/",
+        "${workspaceFolder}/external/gflags/include/",
+        "${workspaceFolder}/external/glog/include/",
+        "${workspaceFolder}/external/json/include/"
+    ],
+    "C_Cpp.default.defines": [
+        "UNICODE",
+        "_UNICODE"
+    ],
+    "C_Cpp.default.cppStandard": "c++20"
+}
