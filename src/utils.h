@@ -19,9 +19,9 @@ using namespace std::chrono_literals;
 using namespace std::string_literals;
 using json = nlohmann::ordered_json;
 
-#define JD_TRY try {
-#define JD_CATCH \
-    }            \
+#define TRY try {
+#define CATCH \
+    }         \
     catch (const std::exception &e) { LOG(ERROR) << e.what(); }
 
 #define INIT_LOG(argc, argv)                           \
