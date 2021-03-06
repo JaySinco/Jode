@@ -28,5 +28,20 @@ link_directories(AFTER
   ${CMAKE_SOURCE_DIR}/external/node/lib/
 )
 
-add_library(utils STATIC ${CMAKE_SOURCE_DIR}/src/utils.cpp)
-target_link_libraries(utils fmt.lib gflags_static.lib glog.lib)
+add_executable(jode
+  ${CMAKE_SOURCE_DIR}/src/resource.rc
+  ${CMAKE_SOURCE_DIR}/src/platform.cpp
+  ${CMAKE_SOURCE_DIR}/src/node_internal.cpp
+  ${CMAKE_SOURCE_DIR}/src/context.cpp
+  ${CMAKE_SOURCE_DIR}/src/jode.cpp
+)
+
+target_link_libraries(jode
+  icudata.lib icui18n.lib icustubdata.lib icutools.lib icuucx.lib
+  v8_compiler.lib v8_libbase.lib v8_libplatform.lib v8_snapshot.lib
+  v8_base_without_compiler.lib v8_libsampler.lib llhttp.lib zlib.lib
+  brotli.lib cares.lib histogram.lib http_parser.lib torque_base.lib 
+  libnode.lib libuv.lib uvwasi.lib nghttp2.lib openssl.lib winmm.lib
+  dbghelp.lib ws2_32.lib crypt32.lib iphlpapi.lib psapi.lib userenv.lib
+  fmt.lib gflags_static.lib glog.lib shlwapi.lib
+)

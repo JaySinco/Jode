@@ -19,11 +19,6 @@ using namespace std::chrono_literals;
 using namespace std::string_literals;
 using json = nlohmann::ordered_json;
 
-#define TRY try {
-#define CATCH \
-    }         \
-    catch (const std::exception &e) { LOG(ERROR) << e.what(); }
-
 #define INIT_LOG(argc, argv)                           \
     FLAGS_logtostderr = 1;                             \
     FLAGS_minloglevel = 0;                             \
@@ -32,5 +27,6 @@ using json = nlohmann::ordered_json;
 
 std::string ws2s(const std::wstring &ws, UINT page = CP_ACP);
 std::wstring s2ws(const std::string &s, UINT page = CP_ACP);
-std::string read_file(const std::wstring &path);
-std::pair<int, std::string> exec(const std::wstring &cmd);
+std::pair<bool, std::string> read_file(const std::wstring &path);
+std::tuple<bool, size_t, const char *> load_rc_file(const wchar_t *name);
+std::tuple<bool, int, std::string> exec(const std::wstring &cmd);

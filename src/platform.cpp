@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "platform.h"
 #include <fstream>
 
 std::string ws2s(const std::wstring &ws, UINT page)
@@ -21,18 +21,35 @@ std::wstring s2ws(const std::string &s, UINT page)
     return ws;
 }
 
-std::string read_file(const std::wstring &path)
+std::pair<bool, std::string> read_file(const std::wstring &path)
 {
     std::ifstream in_file(path);
     if (!in_file) {
-        throw std::runtime_error("failed to read file: {}"_format(ws2s(path)));
+        LOG(ERROR) << "failed to read file: {}"_format(ws2s(path));
+        return {false, ""};
     }
     std::stringstream ss;
     ss << in_file.rdbuf();
-    return ss.str();
+    return {true, ss.str()};
 }
 
-std::pair<int, std::string> exec(const std::wstring &cmd)
+std::tuple<bool, size_t, const char *> load_rc_file(const wchar_t *name)
+{
+    HMODULE handle = GetModuleHandle(NULL);
+    HRSRC rc = FindResource(handle, name, RT_RCDATA);
+    if (rc == NULL) {
+        LOG(ERROR) << "failed to find resource: {}"_format(GetLastError());
+        return {false, 0, nullptr};
+    }
+    HGLOBAL rc_data = LoadResource(handle, rc);
+    if (rc_data == NULL) {
+        LOG(ERROR) << "failed to load resource: {}"_format(GetLastError());
+        return {false, 0, nullptr};
+    }
+    return {true, SizeofResource(handle, rc), static_cast<const char *>(LockResource(rc_data))};
+}
+
+std::tuple<bool, int, std::string> exec(const std::wstring &cmd)
 {
     SECURITY_ATTRIBUTES sa = {0};
     sa.bInheritHandle = TRUE;
@@ -40,7 +57,8 @@ std::pair<int, std::string> exec(const std::wstring &cmd)
     HANDLE hr = NULL;
     HANDLE hw = NULL;
     if (!CreatePipe(&hr, &hw, &sa, 0)) {
-        throw std::runtime_error("failed to create pipe: {}"_format(GetLastError()));
+        LOG(ERROR) << "failed to create pipe: {}"_format(GetLastError());
+        return {false, 0, ""};
     }
     SetHandleInformation(hr, HANDLE_FLAG_INHERIT, 0);
     STARTUPINFOW si = {sizeof(si)};
@@ -54,8 +72,8 @@ std::pair<int, std::string> exec(const std::wstring &cmd)
                         &si, &pi)) {
         CloseHandle(hr);
         CloseHandle(hw);
-        throw std::runtime_error(
-            "failed to create process for '{}': {}"_format(ws2s(cmd), GetLastError()));
+        LOG(ERROR) << "failed to create process for '{}': {}"_format(ws2s(cmd), GetLastError());
+        return {false, 0, ""};
     }
     CloseHandle(hw);
     std::string result;
@@ -75,5 +93,5 @@ std::pair<int, std::string> exec(const std::wstring &cmd)
     GetExitCodeProcess(pi.hProcess, &exit_code);
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
-    return {exit_code, result};
+    return {true, exit_code, result};
 }

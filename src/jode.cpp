@@ -1,10 +1,13 @@
+#include "resource.h"
 #include "context.h"
-#include "utils.h"
+#include "platform.h"
 #include <uv.h>
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 #include <filesystem>
 
+DEFINE_bool(e, false, "evaluate code snippet");
+DEFINE_int32(thread_num, 4, "node thread pool size");
 DEFINE_string(node_flags, "", "flags used by node, seperated by ';'");
 DEFINE_string(rpath, "", "require path");
 
@@ -39,13 +42,15 @@ int node_run(node::MultiIsolatePlatform *platform, const std::vector<std::string
         std::unique_ptr<node::Environment, decltype(&node::FreeEnvironment)> env(
             node::CreateEnvironment(isolate_data.get(), context, args, exec_args),
             node::FreeEnvironment);
-        std::string code = R"(
-            globalThis.require = require('module').createRequire(__RPATH__ + '/');
-            require('vm').runInThisContext(__CODE__, __FILE__);
-        )";
-        v8::MaybeLocal<v8::Value> loadenv_ret = node::LoadEnvironment(env.get(), code.c_str());
+        auto [ok, size, code] = load_rc_file(MAKEINTRESOURCE(IDC_BOOTSTRAP_JS));
+        if (!ok || code == nullptr) {
+            LOG(ERROR) << "failed to load bootstrap code";
+            return 1;
+        }
+        VLOG(3) << "bootstrap code => \n" << code;
+        v8::MaybeLocal<v8::Value> loadenv_ret = node::LoadEnvironment(env.get(), code);
         if (loadenv_ret.IsEmpty()) {
-            LOG(ERROR) << "failed to load env, there has been a JS exception";
+            LOG(ERROR) << "failed to load node env";
             return 1;
         }
         {
@@ -87,12 +92,13 @@ int node_main(int argc, char **argv)
     std::vector<std::string> errors;
     int exit_code = node::InitializeNodeWithArgs(&args, &exec_args, &errors);
     for (const std::string &error : errors) {
-        LOG(ERROR) << "failed to init node with args: {}"_format(error.c_str());
+        LOG(ERROR) << "failed to init node: {}"_format(error.c_str());
     }
     if (exit_code != 0) {
         return exit_code;
     }
-    std::unique_ptr<node::MultiIsolatePlatform> platform = node::MultiIsolatePlatform::Create(4);
+    std::unique_ptr<node::MultiIsolatePlatform> platform =
+        node::MultiIsolatePlatform::Create(FLAGS_thread_num);
     v8::V8::InitializePlatform(platform.get());
     v8::V8::Initialize();
     exit_code = node_run(platform.get(), args, exec_args);
@@ -104,6 +110,7 @@ int node_main(int argc, char **argv)
 int main(int argc, char **argv)
 {
     INIT_LOG(argc, argv);
+    // resolve rpath
     std::wstring rpath;
     if (FLAGS_rpath.size() == 0) {
         wchar_t cwd[MAX_PATH] = {0};
@@ -116,17 +123,28 @@ int main(int argc, char **argv)
         }
         rpath = path.generic_wstring();
     }
-    g_script_info.rpath = ws2s(rpath, CP_UTF8);
+    g_injected.rpath = ws2s(rpath, CP_UTF8);
+    // resolve code & filename
     if (argc < 2) {
     } else {
+        std::wstring warg1 = s2ws(argv[1]);
+        if (FLAGS_e) {
+            g_injected.code = ws2s(warg1, CP_UTF8);
+            g_injected.filename = "<anonymous>";
+        } else {
+            auto [ok, code] = read_file(warg1);
+            g_injected.code = code;
+            g_injected.filename = ws2s(warg1, CP_UTF8);
+        }
     }
-    if (g_script_info.code.size() == 0) {
-        LOG(ERROR) << "failed to run empty script";
+    if (g_injected.code.size() == 0) {
+        LOG(ERROR) << "injected code is empty";
         return 1;
     }
-    VLOG(3) << "filename=" << g_script_info.filename;
-    VLOG(3) << "code=" << g_script_info.code;
-    VLOG(3) << "rpath=" << g_script_info.rpath;
+    // resolve node argument
+    VLOG(3) << "filename=" << g_injected.filename;
+    VLOG(3) << "code=" << g_injected.code;
+    VLOG(3) << "rpath=" << g_injected.rpath;
     int node_argc = 1;
     std::vector<char *> node_argv = {argv[0]};
     std::vector<std::string> argv_buffer;

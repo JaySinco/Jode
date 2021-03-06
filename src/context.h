@@ -1,12 +1,13 @@
 #pragma once
 #include <node.h>
 
-struct script_info
+struct injected_t
 {
     std::string code;
     std::string filename;
     std::string rpath;
 };
-extern script_info g_script_info;
+
+extern injected_t g_injected;
 
 v8::Local<v8::Context> create_context(v8::Isolate *isolate);
