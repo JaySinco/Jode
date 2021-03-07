@@ -109,6 +109,7 @@ int node_main(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
+    google::SetUsageMessage("[ --flags ] [ js-file ]");
     INIT_LOG(argc, argv);
     // resolve rpath
     std::wstring rpath;
