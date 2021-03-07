@@ -37,11 +37,10 @@ add_executable(jode
 )
 
 target_link_libraries(jode
-  icudata.lib icui18n.lib icustubdata.lib icutools.lib icuucx.lib
-  v8_compiler.lib v8_libbase.lib v8_libplatform.lib v8_snapshot.lib
-  v8_base_without_compiler.lib v8_libsampler.lib llhttp.lib zlib.lib
-  brotli.lib cares.lib histogram.lib http_parser.lib torque_base.lib 
-  libnode.lib libuv.lib uvwasi.lib nghttp2.lib openssl.lib winmm.lib
-  dbghelp.lib ws2_32.lib crypt32.lib iphlpapi.lib psapi.lib userenv.lib
+  icudata.lib icui18n.lib icustubdata.lib icutools.lib icuucx.lib v8_compiler.lib
+  v8_libbase.lib llhttp.lib zlib.lib libuv.lib uvwasi.lib psapi.lib userenv.lib
+  v8_libplatform.lib v8_snapshot.lib v8_base_without_compiler.lib v8_libsampler.lib
+  brotli.lib cares.lib histogram.lib http_parser.lib torque_base.lib libnode.lib
+  nghttp2.lib openssl.lib winmm.lib dbghelp.lib ws2_32.lib crypt32.lib iphlpapi.lib
   fmt.lib gflags_static.lib glog.lib shlwapi.lib
 )
