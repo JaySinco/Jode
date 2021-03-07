@@ -3,13 +3,12 @@
 #include "platform.h"
 #include <uv.h>
 #include <boost/algorithm/string.hpp>
-#include <iostream>
 #include <filesystem>
 
 DEFINE_bool(e, false, "evaluate code snippet");
 DEFINE_int32(thread_num, 4, "node thread pool size");
 DEFINE_string(node_flags, "", "flags used by node, seperated by ';'");
-DEFINE_string(rpath, "", "require path");
+DEFINE_string(rpath, ".", "require path");
 
 int node_run(node::MultiIsolatePlatform *platform, const std::vector<std::string> &args,
              const std::vector<std::string> &exec_args)
@@ -42,13 +41,14 @@ int node_run(node::MultiIsolatePlatform *platform, const std::vector<std::string
         std::unique_ptr<node::Environment, decltype(&node::FreeEnvironment)> env(
             node::CreateEnvironment(isolate_data.get(), context, args, exec_args),
             node::FreeEnvironment);
-        auto [ok, size, code] = load_rc_file(MAKEINTRESOURCE(IDC_BOOTSTRAP_JS));
-        if (!ok || code == nullptr) {
+        auto [ok, size, rc_data] = load_rc_file(MAKEINTRESOURCE(IDC_BOOTSTRAP_JS));
+        if (!ok || rc_data == nullptr) {
             LOG(ERROR) << "failed to load bootstrap code";
             return 1;
         }
-        VLOG(3) << "bootstrap code => \n" << code;
-        v8::MaybeLocal<v8::Value> loadenv_ret = node::LoadEnvironment(env.get(), code);
+        std::string code(rc_data, size);
+        VLOG(3) << "bootstrap-code=\n" << code;
+        v8::MaybeLocal<v8::Value> loadenv_ret = node::LoadEnvironment(env.get(), code.c_str());
         if (loadenv_ret.IsEmpty()) {
             LOG(ERROR) << "failed to load node env";
             return 1;
@@ -126,6 +126,13 @@ int main(int argc, char **argv)
     g_injected.rpath = ws2s(rpath, CP_UTF8);
     // resolve code & filename
     if (argc < 2) {
+        auto [ok, size, rc_data] = load_rc_file(MAKEINTRESOURCE(IDC_REPL_JS));
+        if (!ok || rc_data == nullptr) {
+            LOG(ERROR) << "failed to load repl code";
+            return 1;
+        }
+        g_injected.code = std::string(rc_data, size);
+        g_injected.filename = "repl.js";
     } else {
         std::wstring warg1 = s2ws(argv[1]);
         if (FLAGS_e) {
@@ -138,15 +145,18 @@ int main(int argc, char **argv)
         }
     }
     if (g_injected.code.size() == 0) {
-        LOG(ERROR) << "injected code is empty";
         return 1;
     }
     // resolve node argument
     VLOG(3) << "filename=" << g_injected.filename;
-    VLOG(3) << "code=" << g_injected.code;
+    VLOG(3) << "code=\n" << g_injected.code;
     VLOG(3) << "rpath=" << g_injected.rpath;
     int node_argc = 1;
     std::vector<char *> node_argv = {argv[0]};
+    if (argc < 2) {
+        ++node_argc;
+        node_argv.push_back(new char[]{"--experimental-repl-await"});
+    }
     std::vector<std::string> argv_buffer;
     if (FLAGS_node_flags.size() > 0) {
         boost::split(argv_buffer, FLAGS_node_flags, boost::is_any_of(";"));

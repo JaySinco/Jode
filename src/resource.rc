@@ -1,3 +1,0 @@
-#include "resource.h"
-
-IDC_BOOTSTRAP_JS RCDATA "bootstrap.js"
