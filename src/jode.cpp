@@ -7,7 +7,7 @@
 
 DEFINE_bool(e, false, "evaluate code snippet");
 DEFINE_int32(thread_num, 4, "node thread pool size");
-DEFINE_string(node_flags, "", "flags used by node, seperated by ';'");
+DEFINE_string(node_args, "", "arguments used by node, seperated by ';'");
 DEFINE_string(rpath, ".", "require path");
 
 int node_run(node::MultiIsolatePlatform *platform, const std::vector<std::string> &args,
@@ -43,11 +43,10 @@ int node_run(node::MultiIsolatePlatform *platform, const std::vector<std::string
             node::FreeEnvironment);
         auto [ok, size, rc_data] = load_rc_file(MAKEINTRESOURCE(IDC_BOOTSTRAP_JS));
         if (!ok || rc_data == nullptr) {
-            LOG(ERROR) << "failed to load bootstrap code";
             return 1;
         }
         std::string code(rc_data, size);
-        VLOG(3) << "bootstrap-code=\n" << code;
+        VLOG(3) << "bootstrap=\n" << code;
         v8::MaybeLocal<v8::Value> loadenv_ret = node::LoadEnvironment(env.get(), code.c_str());
         if (loadenv_ret.IsEmpty()) {
             LOG(ERROR) << "failed to load node env";
@@ -107,51 +106,47 @@ int node_main(int argc, char **argv)
     return exit_code;
 }
 
-int main(int argc, char **argv)
+void resolve_rpath(std::string &rpath)
 {
-    google::SetUsageMessage("[ --flags ] [ js-file ]");
-    INIT_LOG(argc, argv);
-    // resolve rpath
-    std::wstring rpath;
-    if (FLAGS_rpath.size() == 0) {
+    std::filesystem::path abs_path;
+    if (FLAGS_rpath.size() != 0) {
+        abs_path = std::filesystem::absolute(FLAGS_rpath);
+    } else {
         wchar_t cwd[MAX_PATH] = {0};
         GetModuleFileNameW(NULL, cwd, MAX_PATH);
-        rpath = std::filesystem::path(cwd).parent_path().generic_wstring();
-    } else {
-        auto path = std::filesystem::path(FLAGS_rpath);
-        if (path.is_relative()) {
-            path = std::filesystem::absolute(path);
-        }
-        rpath = path.generic_wstring();
+        abs_path = std::filesystem::path(cwd).parent_path();
     }
-    g_injected.rpath = ws2s(rpath, CP_UTF8);
-    // resolve code & filename
-    if (argc < 2) {
-        auto [ok, size, rc_data] = load_rc_file(MAKEINTRESOURCE(IDC_REPL_JS));
-        if (!ok || rc_data == nullptr) {
-            LOG(ERROR) << "failed to load repl code";
-            return 1;
-        }
-        g_injected.code = std::string(rc_data, size);
-        g_injected.filename = "repl.js";
-    } else {
-        std::wstring warg1 = s2ws(argv[1]);
-        if (FLAGS_e) {
-            g_injected.code = ws2s(warg1, CP_UTF8);
-            g_injected.filename = "<anonymous>";
-        } else {
-            auto [ok, code] = read_file(warg1);
-            g_injected.code = code;
-            g_injected.filename = ws2s(warg1, CP_UTF8);
-        }
+    rpath = ws2s(abs_path.generic_wstring(), CP_UTF8);
+}
+
+void resolve_script(const char *arg1, std::string &code, std::string &filename)
+{
+    if (arg1 == nullptr || std::strlen(arg1) == 0) {
+        auto [_, size, rc_data] = load_rc_file(MAKEINTRESOURCE(IDC_REPL_JS));
+        code = std::string(rc_data, size);
+        filename = "repl.js";
+        return;
     }
-    if (g_injected.code.size() == 0) {
-        return 1;
+    std::wstring warg1 = s2ws(arg1);
+    if (FLAGS_e) {
+        code = ws2s(warg1, CP_UTF8);
+        filename = "<anonymous>";
+        return;
     }
-    // resolve node argument
+    auto [_, file_data] = read_file(warg1);
+    code = file_data;
+    filename = ws2s(warg1, CP_UTF8);
+}
+
+int main(int argc, char **argv)
+{
+    google::SetUsageMessage("[[ flags ]] [ -e code | file ]");
+    INIT_LOG(argc, argv);
+    resolve_rpath(g_injected.rpath);
+    resolve_script(argc > 1 ? argv[1] : nullptr, g_injected.code, g_injected.filename);
+    VLOG(3) << "rpath=" << g_injected.rpath;
     VLOG(3) << "filename=" << g_injected.filename;
     VLOG(3) << "code=\n" << g_injected.code;
-    VLOG(3) << "rpath=" << g_injected.rpath;
     int node_argc = 1;
     std::vector<char *> node_argv = {argv[0]};
     if (argc < 2) {
@@ -159,14 +154,14 @@ int main(int argc, char **argv)
         node_argv.push_back(new char[]{"--experimental-repl-await"});
     }
     std::vector<std::string> argv_buffer;
-    if (FLAGS_node_flags.size() > 0) {
-        boost::split(argv_buffer, FLAGS_node_flags, boost::is_any_of(";"));
+    if (FLAGS_node_args.size() > 0) {
+        boost::split(argv_buffer, FLAGS_node_args, boost::is_any_of(";"));
         for (auto &a : argv_buffer) {
             ++node_argc;
             node_argv.push_back(a.data());
         }
     }
-    for (int i = 0; i < node_argc; ++i) {
+    for (int i = 1; i < node_argc; ++i) {
         VLOG(3) << "arg[" << i << "]=" << node_argv.at(i);
     }
     return node_main(node_argc, node_argv.data());

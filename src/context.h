@@ -3,9 +3,9 @@
 
 struct injected_t
 {
-    std::string code;
-    std::string filename;
     std::string rpath;
+    std::string filename;
+    std::string code;
 };
 
 extern injected_t g_injected;
