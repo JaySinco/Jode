@@ -8,10 +8,10 @@ cloc="${cwd}/external/.bin/cloc.exe"
 case $1 in
 "")
     target=""
-    ${cloc} --quiet "${cwd}/src"
+    ${cloc} --quiet src lib
     ;;
 clean)
-    rm -rf dest/ bin/
+    rm -rf out/ bin/
     exit 0
     ;;
 *)
@@ -21,7 +21,7 @@ esac
 
 BUILD_TYPE=`echo ${MSVC_BUILD_TYPE} | tr '[:lower:]' '[:upper:]'`
 
-yarn run eslint ./src/res/ --ext ts --fix \
+yarn run eslint ./lib/ --fix \
 && \
 yarn run webpack \
 && \

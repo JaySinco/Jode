@@ -10,22 +10,22 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 include_directories(AFTER
   ${CMAKE_SOURCE_DIR}/src/
-  ${CMAKE_SOURCE_DIR}/external/boost/include/boost-1_74/
-  ${CMAKE_SOURCE_DIR}/external/fmt/include/
-  ${CMAKE_SOURCE_DIR}/external/gflags/include/
-  ${CMAKE_SOURCE_DIR}/external/glog/include/
-  ${CMAKE_SOURCE_DIR}/external/json/include/
-  ${CMAKE_SOURCE_DIR}/external/node/include/
-  ${CMAKE_SOURCE_DIR}/external/node/include/v8/
-  ${CMAKE_SOURCE_DIR}/external/node/include/uv/
+  ${CMAKE_SOURCE_DIR}/deps/boost/include/boost-1_74/
+  ${CMAKE_SOURCE_DIR}/deps/fmt/include/
+  ${CMAKE_SOURCE_DIR}/deps/gflags/include/
+  ${CMAKE_SOURCE_DIR}/deps/glog/include/
+  ${CMAKE_SOURCE_DIR}/deps/json/include/
+  ${CMAKE_SOURCE_DIR}/deps/node/include/
+  ${CMAKE_SOURCE_DIR}/deps/node/include/v8/
+  ${CMAKE_SOURCE_DIR}/deps/node/include/uv/
 )
 
 link_directories(AFTER
-  ${CMAKE_SOURCE_DIR}/external/boost/lib/
-  ${CMAKE_SOURCE_DIR}/external/fmt/lib/
-  ${CMAKE_SOURCE_DIR}/external/gflags/lib/
-  ${CMAKE_SOURCE_DIR}/external/glog/lib/
-  ${CMAKE_SOURCE_DIR}/external/node/lib/
+  ${CMAKE_SOURCE_DIR}/deps/boost/lib/
+  ${CMAKE_SOURCE_DIR}/deps/fmt/lib/
+  ${CMAKE_SOURCE_DIR}/deps/gflags/lib/
+  ${CMAKE_SOURCE_DIR}/deps/glog/lib/
+  ${CMAKE_SOURCE_DIR}/deps/node/lib/
 )
 
 add_executable(jode
