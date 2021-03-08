@@ -8,12 +8,14 @@
         "external/*/lib": true,
         "external/*/share": true,
         "external/*/src/build": true,
-        "external/*/src/*[0-9]": true
+        "external/*/src/*[0-9]": true,
+        "node_modules": true
     },
     "files.watcherExclude": {
         "bin": true,
         "dest": true,
-        "external": true
+        "external": true,
+        "node_modules": true
     },
     "C_Cpp.default.includePath": [
         "${workspaceFolder}/src/",

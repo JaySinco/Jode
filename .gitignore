@@ -7,3 +7,4 @@
 /external/*/share
 /external/*/src/*
 !/external/*/src/build.sh
+/node_modules

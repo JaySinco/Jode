@@ -1,0 +1,14 @@
+{
+  "line"        : true,
+  "file"        : true,
+  "regexes"     : [],
+  "macros"      : [],
+  "callbacks"   : [
+    {
+      "fileName": "all",
+      "scope"   : "line",
+      "callback": "(line, fileName, lineNumber) => line.replace(/\\blog\\.(debug|info|warn|error)/, (match) => `((...args) => ${match}(\"[${fileName}:${lineNumber}]\", ...args))`,'g')",
+      "cc": "log"
+    }
+  ]
+}

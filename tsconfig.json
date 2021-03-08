@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "target": "ES2019",
+        "lib": ["ES2020"],
+        "module": "CommonJS",
+        "strict": true,
+        "noUnusedLocals": false,
+        "noImplicitAny": false,
+        "noImplicitReturns": true,
+        "allowSyntheticDefaultImports": true,
+        "skipLibCheck": true,    
+        "experimentalDecorators": true,
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "baseUrl": ".",
+        "typeRoots": ["node_modules/@types"],
+        "paths": {
+            "~/*": ["./*"]
+        },
+        "outDir": "bin"
+    }
+}
