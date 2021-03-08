@@ -1,11 +1,10 @@
 const path = require("path");
 const TerserPlugin = require("terser-webpack-plugin");
 
-module.exports = [
-    {
+function verboseConfig(from, to) {
+    return {
         mode: "development",
         target: "node",
-        entry: path.resolve(__dirname, "src", "res", "node-debugger.ts"),
         module: {
             rules: [
                 {
@@ -28,16 +27,21 @@ module.exports = [
                 "~": path.resolve(__dirname)
             }
         },
-        output: {
-            path: path.resolve(__dirname, "bin"),
-            filename: "node-debugger.js",
-            libraryTarget: "umd"
-        },
         context: path.resolve(__dirname),
         optimization: {
             minimizer: [
                 new TerserPlugin({ extractComments: false })
             ]
-        }
-    }
+        },
+        entry: path.resolve(from),
+        output: {
+            path: path.resolve(path.dirname(to)),
+            filename: path.basename(to),
+            libraryTarget: "umd"
+        },
+    };
+}
+
+module.exports = [
+    verboseConfig('./src/res/test.ts', './bin/test.js'),
 ];
