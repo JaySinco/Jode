@@ -25,7 +25,7 @@ yarn run eslint lib/ --fix \
 && \
 yarn run webpack \
 && \
-find src/ -type f -exec ${fmt} -i {} \; \
+find src/ lib/ -type f -exec ${fmt} -i {} \; \
 && \
 mkdir -p ${CMAKE_OUT_DIR}/ bin/ \
 && \
