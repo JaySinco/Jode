@@ -7,7 +7,7 @@
 
 DEFINE_bool(e, false, "evaluate code snippet");
 DEFINE_int32(thread_num, 4, "node thread pool size");
-DEFINE_string(node_args, "", "arguments used by node, seperated by ';'");
+DEFINE_string(node_args, "", "args used by node, sep by ';'");
 DEFINE_string(rpath, ".", "require path");
 
 int node_run(node::MultiIsolatePlatform *platform, const std::vector<std::string> &args,
@@ -46,7 +46,7 @@ int node_run(node::MultiIsolatePlatform *platform, const std::vector<std::string
             return 1;
         }
         std::string code(rc_data, size);
-        VLOG(3) << "bootstrap=\n" << code;
+        VLOG(3) << "bootstrap=`\n" << code << "`";
         v8::MaybeLocal<v8::Value> loadenv_ret = node::LoadEnvironment(env.get(), code.c_str());
         if (loadenv_ret.IsEmpty()) {
             LOG(ERROR) << "failed to load node env";
@@ -110,7 +110,7 @@ void resolve_rpath(std::string &rpath)
 {
     std::filesystem::path abs_path;
     if (FLAGS_rpath.size() != 0) {
-        abs_path = std::filesystem::absolute(FLAGS_rpath);
+        abs_path = std::filesystem::absolute(s2ws(FLAGS_rpath));
     } else {
         wchar_t cwd[MAX_PATH] = {0};
         GetModuleFileNameW(NULL, cwd, MAX_PATH);
@@ -142,11 +142,18 @@ int main(int argc, char **argv)
 {
     google::SetUsageMessage("[[ flags ]] [ -e code | file ]");
     INIT_LOG(argc, argv);
+    if (argc > 2) {
+        google::ShowUsageWithFlagsRestrict(argv[0], "jode");
+        return 1;
+    }
     resolve_rpath(g_injected.rpath);
     resolve_script(argc > 1 ? argv[1] : nullptr, g_injected.code, g_injected.filename);
+    if (g_injected.code.size() == 0) {
+        return 1;
+    }
     VLOG(3) << "rpath=" << g_injected.rpath;
     VLOG(3) << "filename=" << g_injected.filename;
-    VLOG(3) << "code=\n" << g_injected.code;
+    VLOG(3) << "code=`\n" << g_injected.code << "`";
     int node_argc = 1;
     std::vector<char *> node_argv = {argv[0]};
     if (argc < 2) {
