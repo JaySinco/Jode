@@ -46,7 +46,6 @@ int node_run(node::MultiIsolatePlatform *platform, const std::vector<std::string
             return 1;
         }
         std::string code(rc_data, size);
-        VLOG(3) << "bootstrap=`\n" << code << "`";
         v8::MaybeLocal<v8::Value> loadenv_ret = node::LoadEnvironment(env.get(), code.c_str());
         if (loadenv_ret.IsEmpty()) {
             LOG(ERROR) << "failed to load node env";
@@ -153,7 +152,6 @@ int main(int argc, char **argv)
     }
     VLOG(3) << "rpath=" << g_injected.rpath;
     VLOG(3) << "filename=" << g_injected.filename;
-    VLOG(3) << "code=`\n" << g_injected.code << "`";
     int node_argc = 1;
     std::vector<char *> node_argv = {argv[0]};
     if (argc < 2) {

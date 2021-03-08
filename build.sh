@@ -2,8 +2,8 @@
 
 source "./source_in_bash_profile.sh"
 cwd=`readlink -f .`
-fmt="${cwd}/external/.bin/clang-format.exe"
-cloc="${cwd}/external/.bin/cloc.exe"
+cloc="${cwd}/node_modules/.bin/cloc.exe"
+fmt="${cwd}/node_modules/.bin/clang-format.exe"
 
 case $1 in
 "")
@@ -21,15 +21,15 @@ esac
 
 BUILD_TYPE=`echo ${MSVC_BUILD_TYPE} | tr '[:lower:]' '[:upper:]'`
 
-yarn run eslint ./lib/ --fix \
+yarn run eslint lib/ --fix \
 && \
 yarn run webpack \
 && \
-find "${cwd}/src" -type f -exec ${fmt} -i {} \; \
+find src/ -type f -exec ${fmt} -i {} \; \
 && \
-mkdir -p dest/ bin/ \
+mkdir -p ${CMAKE_OUT_DIR}/ bin/ \
 && \
-cd dest/ \
+cd ${CMAKE_OUT_DIR}/ \
 && \
 ${CMAKE_CMD} "${CMAKE_GENERATOR}" ../ \
     -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_${BUILD_TYPE}=${cwd}/bin/ \

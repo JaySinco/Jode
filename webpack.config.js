@@ -3,7 +3,7 @@ const TerserPlugin = require("terser-webpack-plugin");
 
 function verboseConfig(from, to) {
     return {
-        mode: "development",
+        mode: "production", // development or production
         target: "node",
         module: {
             rules: [
@@ -12,6 +12,13 @@ function verboseConfig(from, to) {
                     exclude: /node_modules/,
                     use: [
                         "ts-loader",
+                        "preprocessor-loader?line&file&config=" + path.join(__dirname, "./preprocess.json"),
+                    ]
+                },
+                {
+                    test: /\.jsx?$/,
+                    exclude: /node_modules/,
+                    use: [
                         "preprocessor-loader?line&file&config=" + path.join(__dirname, "./preprocess.json"),
                     ]
                 },
@@ -43,5 +50,5 @@ function verboseConfig(from, to) {
 }
 
 module.exports = [
-    verboseConfig('./src/res/test.ts', './bin/test.js'),
+    verboseConfig('./lib/test.js', './bin/test.js'),
 ];

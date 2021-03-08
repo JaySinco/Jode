@@ -3,9 +3,9 @@
 source "../../../source_in_bash_profile.sh"
 cwd=`readlink -f .`
 
-mkdir -p build/ \
+mkdir -p ${CMAKE_OUT_DIR}/ \
 && \
-cd build \
+cd ${CMAKE_OUT_DIR} \
 && \
 ${CMAKE_CMD} "${CMAKE_GENERATOR}" ../fmt-7.1.3 \
     -DFMT_TEST=off \

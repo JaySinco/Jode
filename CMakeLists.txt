@@ -29,10 +29,10 @@ link_directories(AFTER
 )
 
 add_executable(jode
-  ${CMAKE_SOURCE_DIR}/src/res/jode.rc
   ${CMAKE_SOURCE_DIR}/src/platform.cpp
   ${CMAKE_SOURCE_DIR}/src/node_internal.cpp
   ${CMAKE_SOURCE_DIR}/src/context.cpp
+  ${CMAKE_SOURCE_DIR}/src/jode.rc
   ${CMAKE_SOURCE_DIR}/src/jode.cpp
 )
 
