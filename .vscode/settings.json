@@ -1,6 +1,5 @@
 {
     "files.exclude": {
-        "bin": true,
         "out": true,
         "deps/.bin/*.exe": true,
         "deps/*/bin": true,
