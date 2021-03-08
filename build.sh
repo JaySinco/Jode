@@ -21,6 +21,10 @@ esac
 
 BUILD_TYPE=`echo ${MSVC_BUILD_TYPE} | tr '[:lower:]' '[:upper:]'`
 
+yarn run eslint ./src/res/ --ext ts --fix \
+&& \
+yarn run webpack \
+&& \
 find "${cwd}/src" -type f -exec ${fmt} -i {} \; \
 && \
 mkdir -p dest/ bin/ \
