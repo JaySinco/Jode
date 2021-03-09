@@ -21,9 +21,9 @@ esac
 
 BUILD_TYPE=`echo ${MSVC_BUILD_TYPE} | tr '[:lower:]' '[:upper:]'`
 
-yarn run eslint lib/ --fix \
+yarn run eslint lib/ --config ${cwd}/lib/config/.eslintrc.json --fix \
 && \
-find src/ lib/ -type f -exec ${fmt} -i {} \; \
+find src/ lib/ -type f ! -path '*.json' -exec ${fmt} -i {} \; \
 && \
 mkdir -p ${CMAKE_OUT_DIR}/ bin/ \
 && \
@@ -32,6 +32,4 @@ cd ${CMAKE_OUT_DIR}/ \
 ${CMAKE_CMD} "${CMAKE_GENERATOR}" ../ \
     -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_${BUILD_TYPE}=${cwd}/bin/ \
 && \
-${MSVC_BUILD} ${target} \
-&& \
-yarn run webpack
+${MSVC_BUILD} ${target}

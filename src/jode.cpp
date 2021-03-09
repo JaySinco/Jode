@@ -90,7 +90,7 @@ int node_main(int argc, char **argv)
     std::vector<std::string> exec_args;
     std::vector<std::string> errors;
     int exit_code = node::InitializeNodeWithArgs(&args, &exec_args, &errors);
-    for (const std::string &error : errors) {
+    for (const std::string &error: errors) {
         LOG(ERROR) << "failed to init node: {}"_format(error.c_str());
     }
     if (exit_code != 0) {
@@ -167,7 +167,7 @@ int main(int argc, char **argv)
     std::vector<std::string> argv_buffer;
     if (FLAGS_node_flags.size() > 0) {
         boost::split(argv_buffer, FLAGS_node_flags, boost::is_any_of(";"));
-        for (auto &a : argv_buffer) {
+        for (auto &a: argv_buffer) {
             ++node_argc;
             node_argv.push_back(a.data());
         }
