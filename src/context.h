@@ -5,6 +5,7 @@ struct injected_t
 {
     std::string rpath;
     std::string filename;
+    std::string dirname;
     std::string code;
 };
 

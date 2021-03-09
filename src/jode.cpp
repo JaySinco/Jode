@@ -119,7 +119,8 @@ void resolve_rpath(std::string &rpath)
     rpath = ws2s(abs_path.generic_wstring(), CP_UTF8);
 }
 
-void resolve_script(const char *arg1, std::string &code, std::string &filename)
+void resolve_script(const char *arg1, std::string &code, std::string &filename,
+                    std::string &dirname)
 {
     if (arg1 == nullptr || std::strlen(arg1) == 0) {
         auto [_, size, rc_data] = load_rc_file(MAKEINTRESOURCE(IDC_REPL_JS));
@@ -135,7 +136,9 @@ void resolve_script(const char *arg1, std::string &code, std::string &filename)
     }
     auto [_, file_data] = read_file(warg1);
     code = file_data;
-    filename = ws2s(warg1, CP_UTF8);
+    auto filepath = std::filesystem::absolute(warg1);
+    filename = ws2s(filepath.generic_wstring(), CP_UTF8);
+    dirname = ws2s(filepath.parent_path().generic_wstring(), CP_UTF8);
 }
 
 int main(int argc, char **argv)
@@ -147,12 +150,14 @@ int main(int argc, char **argv)
         return 1;
     }
     resolve_rpath(g_injected.rpath);
-    resolve_script(argc > 1 ? argv[1] : nullptr, g_injected.code, g_injected.filename);
+    resolve_script(argc > 1 ? argv[1] : nullptr, g_injected.code, g_injected.filename,
+                   g_injected.dirname);
     if (g_injected.code.size() == 0) {
         return 1;
     }
     VLOG(3) << "rpath=" << g_injected.rpath;
     VLOG(3) << "filename=" << g_injected.filename;
+    VLOG(3) << "dirname=" << g_injected.dirname;
     int node_argc = 1;
     std::vector<char *> node_argv = {argv[0]};
     if (argc < 2) {
@@ -167,7 +172,7 @@ int main(int argc, char **argv)
             node_argv.push_back(a.data());
         }
     }
-    for (int i = FLAGS_e ? 2 : 1; i < argc; ++i) {
+    for (int i = 2; i < argc; ++i) {
         ++node_argc;
         node_argv.push_back(argv[i]);
     }

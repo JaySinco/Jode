@@ -25,7 +25,8 @@
         "${workspaceFolder}/deps/json/include/",
         "${workspaceFolder}/deps/node/include/",
         "${workspaceFolder}/deps/node/include/v8/",
-        "${workspaceFolder}/deps/node/include/uv/"
+        "${workspaceFolder}/deps/node/include/uv/",
+        "${workspaceFolder}/deps/node-addon-api/include/"
     ],
     "C_Cpp.default.defines": [
         "UNICODE",

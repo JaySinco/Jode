@@ -31,11 +31,13 @@ static void global_getter_cb(v8::Local<v8::String> property,
     v8::HandleScope handle_scope(isolate);
     v8::String::Utf8Value property_value(isolate, property);
     std::string property_str = *property_value;
-    if (property_str == "__rpath__") {
+    if (property_str == "__rpath") {
         info.GetReturnValue().Set(v8::String::NewFromUtf8(isolate, g_injected.rpath.c_str()));
-    } else if (property_str == "__filename__") {
+    } else if (property_str == "__filename") {
         info.GetReturnValue().Set(v8::String::NewFromUtf8(isolate, g_injected.filename.c_str()));
-    } else if (property_str == "__code__") {
+    } else if (property_str == "__dirname") {
+        info.GetReturnValue().Set(v8::String::NewFromUtf8(isolate, g_injected.dirname.c_str()));
+    } else if (property_str == "__code") {
         info.GetReturnValue().Set(v8::String::NewFromUtf8(isolate, g_injected.code.c_str()));
     }
 }
@@ -50,8 +52,9 @@ v8::Local<v8::Context> create_context(v8::Isolate *isolate)
 
     v8::Local<v8::ObjectTemplate> global = v8::ObjectTemplate::New(isolate);
     global->Set(isolate, "log", log);
-    global->SetAccessor(v8::String::NewFromUtf8(isolate, "__rpath__"), global_getter_cb);
-    global->SetAccessor(v8::String::NewFromUtf8(isolate, "__filename__"), global_getter_cb);
-    global->SetAccessor(v8::String::NewFromUtf8(isolate, "__code__"), global_getter_cb);
+    global->SetAccessor(v8::String::NewFromUtf8(isolate, "__rpath"), global_getter_cb);
+    global->SetAccessor(v8::String::NewFromUtf8(isolate, "__filename"), global_getter_cb);
+    global->SetAccessor(v8::String::NewFromUtf8(isolate, "__dirname"), global_getter_cb);
+    global->SetAccessor(v8::String::NewFromUtf8(isolate, "__code"), global_getter_cb);
     return node::NewContext(isolate, global);
 }

@@ -18,6 +18,7 @@ include_directories(AFTER
   ${CMAKE_SOURCE_DIR}/deps/node/include/
   ${CMAKE_SOURCE_DIR}/deps/node/include/v8/
   ${CMAKE_SOURCE_DIR}/deps/node/include/uv/
+  ${CMAKE_SOURCE_DIR}/deps/node-addon-api/include/
 )
 
 link_directories(AFTER
@@ -29,10 +30,10 @@ link_directories(AFTER
 )
 
 add_executable(jode
+  ${CMAKE_SOURCE_DIR}/src/res/jode.rc
   ${CMAKE_SOURCE_DIR}/src/platform.cpp
   ${CMAKE_SOURCE_DIR}/src/node_internal.cpp
   ${CMAKE_SOURCE_DIR}/src/context.cpp
-  ${CMAKE_SOURCE_DIR}/src/jode.rc
   ${CMAKE_SOURCE_DIR}/src/jode.cpp
 )
 
@@ -44,3 +45,10 @@ target_link_libraries(jode
   nghttp2.lib openssl.lib winmm.lib dbghelp.lib ws2_32.lib crypt32.lib iphlpapi.lib
   fmt.lib gflags_static.lib glog.lib shlwapi.lib
 )
+
+add_library(binding SHARED
+  ${CMAKE_SOURCE_DIR}/src/addon/binding.cpp
+)
+target_compile_definitions(binding PRIVATE NAPI_DISABLE_CPP_EXCEPTIONS)
+set_target_properties(binding PROPERTIES PREFIX "" SUFFIX ".node")
+target_link_libraries(binding node.lib)
