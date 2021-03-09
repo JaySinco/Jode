@@ -5,9 +5,10 @@
 #include <boost/algorithm/string.hpp>
 #include <filesystem>
 
+DEFINE_bool(h, false, "show concise usage");
 DEFINE_bool(e, false, "evaluate code snippet");
 DEFINE_int32(thread_num, 4, "node thread pool size");
-DEFINE_string(node_args, "", "args used by node, sep by ';'");
+DEFINE_string(node_flags, "", "flags used by node, sep by ';'");
 DEFINE_string(rpath, ".", "require path");
 
 int node_run(node::MultiIsolatePlatform *platform, const std::vector<std::string> &args,
@@ -123,7 +124,7 @@ void resolve_script(const char *arg1, std::string &code, std::string &filename)
     if (arg1 == nullptr || std::strlen(arg1) == 0) {
         auto [_, size, rc_data] = load_rc_file(MAKEINTRESOURCE(IDC_REPL_JS));
         code = std::string(rc_data, size);
-        filename = "repl.js";
+        filename = "<repl>";
         return;
     }
     std::wstring warg1 = s2ws(arg1);
@@ -139,9 +140,9 @@ void resolve_script(const char *arg1, std::string &code, std::string &filename)
 
 int main(int argc, char **argv)
 {
-    google::SetUsageMessage("[[ flags ]] [ -e code | file ]");
+    google::SetUsageMessage("[[ flags ]] [ -e code | file ] [[ args ]]");
     INIT_LOG(argc, argv);
-    if (argc > 2) {
+    if (FLAGS_h) {
         google::ShowUsageWithFlagsRestrict(argv[0], "jode");
         return 1;
     }
@@ -159,12 +160,16 @@ int main(int argc, char **argv)
         node_argv.push_back(new char[]{"--experimental-repl-await"});
     }
     std::vector<std::string> argv_buffer;
-    if (FLAGS_node_args.size() > 0) {
-        boost::split(argv_buffer, FLAGS_node_args, boost::is_any_of(";"));
+    if (FLAGS_node_flags.size() > 0) {
+        boost::split(argv_buffer, FLAGS_node_flags, boost::is_any_of(";"));
         for (auto &a : argv_buffer) {
             ++node_argc;
             node_argv.push_back(a.data());
         }
+    }
+    for (int i = FLAGS_e ? 2 : 1; i < argc; ++i) {
+        ++node_argc;
+        node_argv.push_back(argv[i]);
     }
     for (int i = 1; i < node_argc; ++i) {
         VLOG(3) << "arg[" << i << "]=" << node_argv.at(i);
