@@ -47,8 +47,12 @@ target_link_libraries(jode
 )
 
 add_library(binding SHARED
+  ${CMAKE_SOURCE_DIR}/src/addon/delay_load_hook.cpp
   ${CMAKE_SOURCE_DIR}/src/addon/binding.cpp
 )
-target_compile_definitions(binding PRIVATE NAPI_DISABLE_CPP_EXCEPTIONS)
+target_compile_definitions(binding PUBLIC
+  NAPI_VERSION=3 BUILDING_NODE_EXTENSION NAPI_DISABLE_CPP_EXCEPTIONS
+)
+set_target_properties(binding PROPERTIES LINK_FLAGS "/DELAYLOAD:node.exe")
 set_target_properties(binding PROPERTIES PREFIX "" SUFFIX ".node")
 target_link_libraries(binding node.lib)

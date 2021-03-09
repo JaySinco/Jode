@@ -25,6 +25,9 @@ function verboseConfig(from, to) {
                 {
                     test: /\.node$/,
                     loader: "node-loader",
+                    options: {
+                        name: '[name].[ext]',
+                    },
                 },
             ],
         },
@@ -50,5 +53,5 @@ function verboseConfig(from, to) {
 }
 
 module.exports = [
-    verboseConfig('./lib/test.js', './bin/test.js'),
+    verboseConfig('./lib/test_binding.js', './bin/test_binding.js'),
 ];
