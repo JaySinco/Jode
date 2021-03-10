@@ -19,8 +19,6 @@ clean)
     ;;
 esac
 
-BUILD_TYPE=`echo ${MSVC_BUILD_TYPE} | tr '[:lower:]' '[:upper:]'`
-
 yarn run eslint lib/ --config ${cwd}/lib/config/.eslintrc.json --fix \
 && \
 find src/ lib/ -type f ! -path '*.json' -exec ${fmt} -i {} \; \
@@ -29,7 +27,9 @@ mkdir -p ${CMAKE_OUT_DIR}/ bin/ \
 && \
 cd ${CMAKE_OUT_DIR}/ \
 && \
+msbuild_type=`echo ${MSVC_BUILD_TYPE} | tr '[:lower:]' '[:upper:]'` \
+&& \
 ${CMAKE_CMD} "${CMAKE_GENERATOR}" ../ \
-    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_${BUILD_TYPE}=${cwd}/bin/ \
+    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_${msbuild_type}=${cwd}/bin/ \
 && \
 ${MSVC_BUILD} ${target}

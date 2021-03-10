@@ -48,6 +48,7 @@ target_link_libraries(mojo common
 
 add_library(addon SHARED
   ${CMAKE_SOURCE_DIR}/src/addon/delay_load_hook.cpp
+  ${CMAKE_SOURCE_DIR}/src/addon/shell.cpp
   ${CMAKE_SOURCE_DIR}/src/addon/binding.cpp
 )
 target_compile_definitions(addon PUBLIC
