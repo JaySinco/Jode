@@ -1,6 +1,6 @@
 #include "resource.h"
 #include "context.h"
-#include "platform.h"
+#include "utils.h"
 #include <uv.h>
 #include <boost/algorithm/string.hpp>
 #include <filesystem>
@@ -146,7 +146,7 @@ int main(int argc, char **argv)
     google::SetUsageMessage("[[ flags ]] [ -e code | file ] [[ args ]]");
     INIT_LOG(argc, argv);
     if (FLAGS_h) {
-        google::ShowUsageWithFlagsRestrict(argv[0], "jode");
+        google::ShowUsageWithFlagsRestrict(argv[0], "mojo");
         return 1;
     }
     resolve_rpath(g_injected.rpath);

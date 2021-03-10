@@ -1,4 +1,4 @@
-#include "platform.h"
+#include "utils.h"
 #include <napi.h>
 
 Napi::Boolean isFileHidden(const Napi::CallbackInfo &info)

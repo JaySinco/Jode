@@ -1,4 +1,4 @@
-#include "platform.h"
+#include "utils.h"
 #include <fstream>
 
 std::string ws2s(const std::wstring &ws, UINT page)

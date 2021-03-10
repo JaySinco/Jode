@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(Jode)
+project(Mojo)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
@@ -29,16 +29,16 @@ link_directories(AFTER
   ${CMAKE_SOURCE_DIR}/deps/node/lib/
 )
 
-add_library(common STATIC ${CMAKE_SOURCE_DIR}/src/platform.cpp)
+add_library(common STATIC ${CMAKE_SOURCE_DIR}/src/utils.cpp)
 target_link_libraries(common fmt.lib gflags_static.lib glog.lib shlwapi.lib)
 
-add_executable(jode
-  ${CMAKE_SOURCE_DIR}/src/res/jode.rc
+add_executable(mojo
   ${CMAKE_SOURCE_DIR}/src/node_internal.cpp
   ${CMAKE_SOURCE_DIR}/src/context.cpp
-  ${CMAKE_SOURCE_DIR}/src/jode.cpp
+  ${CMAKE_SOURCE_DIR}/src/res/mojo.rc
+  ${CMAKE_SOURCE_DIR}/src/mojo.cpp
 )
-target_link_libraries(jode common
+target_link_libraries(mojo common
   icudata.lib icui18n.lib icustubdata.lib icutools.lib icuucx.lib v8_compiler.lib
   v8_libbase.lib llhttp.lib zlib.lib libuv.lib uvwasi.lib psapi.lib userenv.lib
   v8_libplatform.lib v8_snapshot.lib v8_base_without_compiler.lib v8_libsampler.lib
