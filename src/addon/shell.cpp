@@ -1,23 +1,24 @@
 #include "shell.h"
 #include "utils.h"
 
-Napi::FunctionReference shell_t::constructor;
+Napi::FunctionReference shell_module::constructor;
 
-shell_t::shell_t(const Napi::CallbackInfo &info): Napi::ObjectWrap<shell_t>(info) {}
+shell_module::shell_module(const Napi::CallbackInfo &info): Napi::ObjectWrap<shell_module>(info) {}
 
-Napi::Object shell_t::init(Napi::Env env, Napi::Object exports)
+Napi::Object shell_module::init(Napi::Env env, Napi::Object exports)
 {
-    Napi::Function func = DefineClass(env, "shell",
-                                      {
-                                          StaticMethod<&shell_t::is_file_hidden>("isFileHidden"),
-                                      });
+    Napi::Function func =
+        DefineClass(env, "shell",
+                    {
+                        StaticMethod<&shell_module::is_file_hidden>("isFileHidden"),
+                    });
     constructor = Napi::Persistent(func);
     constructor.SuppressDestruct();
     exports.Set("shell", func);
     return exports;
 }
 
-Napi::Value shell_t::is_file_hidden(const Napi::CallbackInfo &info)
+Napi::Value shell_module::is_file_hidden(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
     if (info.Length() != 1 || (!info[0].IsBuffer() && !info[0].IsString())) {

@@ -2,7 +2,7 @@
 
 Napi::Object init(Napi::Env env, Napi::Object exports)
 {
-    shell_t::init(env, exports);
+    shell_module::init(env, exports);
     return exports;
 }
 
