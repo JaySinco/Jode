@@ -3,6 +3,7 @@
 #include "utils.h"
 #include <shlobj.h>
 #include <wrl/client.h>
+#include <filesystem>
 #include <fstream>
 
 #define LOG_WINERR(msg) LOG(ERROR) << fmt::format(msg ": {}", GetLastError());
@@ -121,9 +122,10 @@ bool move_item_to_trash(const std::wstring &path)
         return false;
     }
     Microsoft::WRL::ComPtr<IShellItem> delete_item;
-    if (FAILED(SHCreateItemFromParsingName(path.c_str(), NULL,
+    std::wstring abs_path = std::filesystem::absolute(path).wstring();
+    if (FAILED(SHCreateItemFromParsingName(abs_path.c_str(), NULL,
                                            IID_PPV_ARGS(delete_item.GetAddressOf())))) {
-        LOG(ERROR) << "failed to create item from path";
+        LOG(ERROR) << "failed to create shell item from path: " << utils::ws2s(abs_path);
         return false;
     }
     BOOL pfAnyOperationsAborted;

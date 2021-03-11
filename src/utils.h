@@ -31,4 +31,5 @@ std::tuple<bool, size_t, const char *> load_rc_file(const wchar_t *name);
 
 std::pair<bool, std::wstring> read_clipboard_text();
 bool write_clipboard_text(const std::wstring &text);
+
 }  // namespace utils
