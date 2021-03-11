@@ -1,8 +1,10 @@
 #include "shell.h"
+#include "utils.h"
 
 Napi::Object init(Napi::Env env, Napi::Object exports)
 {
-    shell_module::init(env, exports);
+    google::InitGoogleLogging("");
+    ShellModule::init(env, exports);
     return exports;
 }
 

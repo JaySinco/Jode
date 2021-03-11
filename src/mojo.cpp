@@ -1,3 +1,6 @@
+#define UNICODE
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 #include "resource.h"
 #include "context.h"
 #include "utils.h"
@@ -42,7 +45,7 @@ int node_run(node::MultiIsolatePlatform *platform, const std::vector<std::string
         std::unique_ptr<node::Environment, decltype(&node::FreeEnvironment)> env(
             node::CreateEnvironment(isolate_data.get(), context, args, exec_args),
             node::FreeEnvironment);
-        auto [ok, size, rc_data] = load_rc_file(MAKEINTRESOURCE(IDC_BOOTSTRAP_JS));
+        auto [ok, size, rc_data] = utils::load_rc_file(MAKEINTRESOURCE(IDC_BOOTSTRAP_JS));
         if (!ok || rc_data == nullptr) {
             return 1;
         }
@@ -110,35 +113,35 @@ void resolve_rpath(std::string &rpath)
 {
     std::filesystem::path abs_path;
     if (FLAGS_rpath.size() != 0) {
-        abs_path = std::filesystem::absolute(s2ws(FLAGS_rpath));
+        abs_path = std::filesystem::absolute(utils::s2ws(FLAGS_rpath));
     } else {
         wchar_t cwd[MAX_PATH] = {0};
         GetModuleFileNameW(NULL, cwd, MAX_PATH);
         abs_path = std::filesystem::path(cwd).parent_path();
     }
-    rpath = ws2s(abs_path.generic_wstring(), CP_UTF8);
+    rpath = utils::ws2s(abs_path.generic_wstring(), true);
 }
 
 void resolve_script(const char *arg1, std::string &code, std::string &filename,
                     std::string &dirname)
 {
     if (arg1 == nullptr || std::strlen(arg1) == 0) {
-        auto [_, size, rc_data] = load_rc_file(MAKEINTRESOURCE(IDC_REPL_JS));
+        auto [_, size, rc_data] = utils::load_rc_file(MAKEINTRESOURCE(IDC_REPL_JS));
         code = std::string(rc_data, size);
         filename = "<repl>";
         return;
     }
-    std::wstring warg1 = s2ws(arg1);
+    std::wstring warg1 = utils::s2ws(arg1);
     if (FLAGS_e) {
-        code = ws2s(warg1, CP_UTF8);
+        code = utils::ws2s(warg1, true);
         filename = "<anonymous>";
         return;
     }
-    auto [_, file_data] = read_file(warg1);
+    auto [_, file_data] = utils::read_file(warg1);
     code = file_data;
     auto filepath = std::filesystem::absolute(warg1);
-    filename = ws2s(filepath.generic_wstring(), CP_UTF8);
-    dirname = ws2s(filepath.parent_path().generic_wstring(), CP_UTF8);
+    filename = utils::ws2s(filepath.generic_wstring(), true);
+    dirname = utils::ws2s(filepath.parent_path().generic_wstring(), true);
 }
 
 int main(int argc, char **argv)

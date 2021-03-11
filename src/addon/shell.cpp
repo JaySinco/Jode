@@ -1,16 +1,17 @@
 #include "shell.h"
 #include "utils.h"
 
-Napi::FunctionReference shell_module::constructor;
+Napi::FunctionReference ShellModule::constructor;
 
-shell_module::shell_module(const Napi::CallbackInfo &info): Napi::ObjectWrap<shell_module>(info) {}
+ShellModule::ShellModule(const Napi::CallbackInfo &info): Napi::ObjectWrap<ShellModule>(info) {}
 
-Napi::Object shell_module::init(Napi::Env env, Napi::Object exports)
+Napi::Object ShellModule::init(Napi::Env env, Napi::Object exports)
 {
     Napi::Function func =
         DefineClass(env, "shell",
                     {
-                        StaticMethod<&shell_module::is_file_hidden>("isFileHidden"),
+                        StaticMethod<&ShellModule::readClipboard>("readClipboard"),
+                        StaticMethod<&ShellModule::writeClipboard>("writeClipboard"),
                     });
     constructor = Napi::Persistent(func);
     constructor.SuppressDestruct();
@@ -18,26 +19,31 @@ Napi::Object shell_module::init(Napi::Env env, Napi::Object exports)
     return exports;
 }
 
-Napi::Value shell_module::is_file_hidden(const Napi::CallbackInfo &info)
+Napi::Value ShellModule::readClipboard(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    if (info.Length() != 1 || (!info[0].IsBuffer() && !info[0].IsString())) {
-        Napi::TypeError::New(env, "invalid argument, should be (path: string|Buffer) => boolean")
+    if (info.Length() != 0) {
+        Napi::TypeError::New(env,
+                             "invalid argument, should be readClipboard() => [boolean, string]")
             .ThrowAsJavaScriptException();
         return info.Env().Undefined();
     }
-    std::string u8path;
-    if (info[0].IsString()) {
-        u8path = info[0].As<Napi::String>();
+    auto [ok, text] = utils::read_clipboard_text();
+    Napi::Array arr = Napi::Array::New(env, 2);
+    arr[static_cast<uint32_t>(0)] = Napi::Boolean::New(env, ok);
+    arr[1] = Napi::String::New(env, utils::ws2s(text, true));
+    return arr;
+}
+
+Napi::Value ShellModule::writeClipboard(const Napi::CallbackInfo &info)
+{
+    Napi::Env env = info.Env();
+    if (info.Length() != 1 || !info[0].IsString()) {
+        Napi::TypeError::New(env,
+                             "invalid argument, should be writeClipboard(text: string) => boolean")
+            .ThrowAsJavaScriptException();
+        return info.Env().Undefined();
     }
-    if (info[0].IsBuffer()) {
-        Napi::Buffer<char> buffer = info[0].As<Napi::Buffer<char>>();
-        u8path = std::string(buffer.Data(), buffer.Length());
-    }
-    std::wstring path = s2ws(u8path, CP_UTF8);
-    DWORD attr = GetFileAttributesW(path.c_str());
-    if (attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_HIDDEN)) {
-        return Napi::Boolean::New(env, true);
-    }
-    return Napi::Boolean::New(env, false);
+    std::string text = info[0].As<Napi::String>();
+    return Napi::Boolean::New(env, utils::write_clipboard_text(utils::s2ws(text, true)));
 }

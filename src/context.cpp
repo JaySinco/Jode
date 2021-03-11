@@ -4,19 +4,19 @@
 
 injected_t g_injected;
 
-#define MAKE_LOG(func, ostream)                                       \
-    static void func(const v8::FunctionCallbackInfo<v8::Value> &args) \
-    {                                                                 \
-        v8::Isolate *isolate = args.GetIsolate();                     \
-        v8::HandleScope handle_scope(isolate);                        \
-        std::vector<std::string> args_list;                           \
-        for (int i = 0; i < args.Length(); ++i) {                     \
-            v8::String::Utf8Value arg_str(isolate, args[i]);          \
-            args_list.push_back(ws2s(s2ws(*arg_str, CP_UTF8)));       \
-        }                                                             \
-        if (args_list.size() > 0) {                                   \
-            ostream << boost::join(args_list, " ");                   \
-        }                                                             \
+#define MAKE_LOG(func, ostream)                                            \
+    static void func(const v8::FunctionCallbackInfo<v8::Value> &args)      \
+    {                                                                      \
+        v8::Isolate *isolate = args.GetIsolate();                          \
+        v8::HandleScope handle_scope(isolate);                             \
+        std::vector<std::string> args_list;                                \
+        for (int i = 0; i < args.Length(); ++i) {                          \
+            v8::String::Utf8Value arg_str(isolate, args[i]);               \
+            args_list.push_back(utils::ws2s(utils::s2ws(*arg_str, true))); \
+        }                                                                  \
+        if (args_list.size() > 0) {                                        \
+            ostream << boost::join(args_list, " ");                        \
+        }                                                                  \
     }
 
 MAKE_LOG(log_error, LOG(ERROR));
