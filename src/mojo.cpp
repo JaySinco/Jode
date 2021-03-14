@@ -12,7 +12,7 @@ DEFINE_bool(h, false, "show concise usage");
 DEFINE_bool(e, false, "evaluate code snippet");
 DEFINE_int32(thread_num, 4, "node thread pool size");
 DEFINE_string(node_flags, "", "flags used by node, sep by ';'");
-DEFINE_string(rpath, ".", "require path");
+DEFINE_string(rpath, "", "require path");
 
 int node_run(node::MultiIsolatePlatform *platform, const std::vector<std::string> &args,
              const std::vector<std::string> &exec_args)
@@ -109,19 +109,6 @@ int node_main(int argc, char **argv)
     return exit_code;
 }
 
-void resolve_rpath(std::string &rpath)
-{
-    std::filesystem::path abs_path;
-    if (FLAGS_rpath.size() != 0) {
-        abs_path = std::filesystem::absolute(utils::s2ws(FLAGS_rpath));
-    } else {
-        wchar_t cwd[MAX_PATH] = {0};
-        GetModuleFileNameW(NULL, cwd, MAX_PATH);
-        abs_path = std::filesystem::path(cwd).parent_path();
-    }
-    rpath = utils::ws2s(abs_path.generic_wstring(), true);
-}
-
 void resolve_script(const char *arg1, std::string &code, std::string &filename,
                     std::string &dirname)
 {
@@ -144,6 +131,23 @@ void resolve_script(const char *arg1, std::string &code, std::string &filename,
     dirname = utils::ws2s(filepath.parent_path().generic_wstring(), true);
 }
 
+void resolve_rpath(std::string &rpath, const std::string &dirname)
+{
+    std::filesystem::path abs_path;
+    if (FLAGS_rpath.size() != 0) {
+        abs_path = std::filesystem::absolute(utils::s2ws(FLAGS_rpath));
+    } else {
+        if (dirname.size() != 0) {
+            rpath = dirname;
+            return;
+        }
+        wchar_t cwd[MAX_PATH] = {0};
+        GetCurrentDirectoryW(MAX_PATH, cwd);
+        abs_path = std::filesystem::path(cwd).parent_path();
+    }
+    rpath = utils::ws2s(abs_path.generic_wstring(), true);
+}
+
 int main(int argc, char **argv)
 {
     google::SetUsageMessage("[[ flags ]] [ -e code | file ] [[ args ]]");
@@ -152,9 +156,9 @@ int main(int argc, char **argv)
         google::ShowUsageWithFlagsRestrict(argv[0], "mojo");
         return 1;
     }
-    resolve_rpath(g_injected.rpath);
     resolve_script(argc > 1 ? argv[1] : nullptr, g_injected.code, g_injected.filename,
                    g_injected.dirname);
+    resolve_rpath(g_injected.rpath, g_injected.dirname);
     if (g_injected.code.size() == 0) {
         return 1;
     }

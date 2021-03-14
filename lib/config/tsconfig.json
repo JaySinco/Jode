@@ -12,11 +12,11 @@
         "experimentalDecorators": true,
         "resolveJsonModule": true,
         "esModuleInterop": true,
-        "baseUrl": ".",
-        "typeRoots": ["node_modules/@types"],
+        "baseUrl": "../../",
+        "typeRoots": ["../../node_modules/@types"],
         "paths": {
-            "~/*": ["../../*"]
+            "~/*": ["*"]
         }
     },
-    "include": [".."]
+    "include": ["../*"],
 }

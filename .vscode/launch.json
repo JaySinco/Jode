@@ -9,11 +9,11 @@
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bin/mojo.exe",
-            "args": [],
+            "args": ["-v=3", "./bin/addon.test.js"],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/bin",
+            "cwd": "${workspaceFolder}",
             "environment": [],
-            "externalConsole": false,
+            "console": "internalConsole",
             "logging": {
                 "moduleLoad": true,
                 "trace": true

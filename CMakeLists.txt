@@ -59,6 +59,10 @@ target_compile_definitions(addon PUBLIC
 set_target_properties(addon PROPERTIES LINK_FLAGS "/DELAYLOAD:node.exe")
 set_target_properties(addon PROPERTIES PREFIX "" SUFFIX ".node")
 target_link_libraries(addon common node.lib)
+add_custom_command(TARGET addon POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/lib/addon.d.ts
+    $<TARGET_FILE_DIR:addon>
+)
 
 add_custom_target(webpack ALL DEPENDS addon
   COMMAND yarn run webpack --config ${CMAKE_SOURCE_DIR}/lib/config/webpack.config.js
