@@ -143,7 +143,7 @@ void resolve_rpath(std::string &rpath, const std::string &dirname)
         }
         wchar_t cwd[MAX_PATH] = {0};
         GetCurrentDirectoryW(MAX_PATH, cwd);
-        abs_path = std::filesystem::path(cwd).parent_path();
+        abs_path = std::filesystem::path(cwd);
     }
     rpath = utils::ws2s(abs_path.generic_wstring(), true);
 }
